@@ -169,3 +169,66 @@ sql_insert_fhir_hic_biochem = "
         readcodedescription AS readCodeDescription
     FROM HIC
 "
+
+sql_create_lothian_readcode = "
+    CREATE TABLE Lothian_ReadCode As
+        SELECT * FROM 
+            (
+              SELECT DISTINCT * FROM Lothian
+            ) b
+        INNER JOIN 
+            (
+              SELECT DISTINCT Test_Code, Read_Code FROM Lothian_TestCode2ReadCode
+             ) lkp
+        ON b.TestItemCode = lkp.Test_Code
+"
+
+sql_create_fhir_lothian = createFhirTable('FHIR_Lothian')
+
+sql_insert_fhir_lothian = "
+    INSERT INTO FHIR_Lothian
+        (
+            subject,
+            category,
+            code,
+            effectiveDate,
+            valueQuantity,
+            valueUnit,
+            valueString,
+            referenceRangeHigh,
+            referenceRangeLow,
+            encounter,
+            specimen,
+            healthBoard,
+            readCodeDescription
+        )
+    SELECT
+        prochi AS subject,
+        '' AS category,
+        Read_Code AS code,
+        SpecimenCollectionDate AS effectiveDate,
+        (case when Value/1 != 0 
+                 then Value 
+              when substring(Value, 1, 1)='>' or substring(value, 1, 1)='<'
+                 then substring(Value, 2, LENGTH(Value)-1)
+              else NULL 
+         end
+         ) AS valueQuantity,
+        Unit AS valueUnit,
+        Value AS valueString,
+        (case when RangeMax/1 != 0 
+                 then RangeMax 
+              else NULL 
+         end
+        ) AS referenceRangeHigh,
+        (case when RangeMin/1 != 0 
+                 then RangeMin 
+              else NULL 
+         end
+        ) AS referenceRangeLow,
+        0 AS encounter,
+        '' AS specimen,
+        'Lothian' AS healthboard,
+        TestItem AS readcodedescription
+    FROM Lothian_ReadCode
+"

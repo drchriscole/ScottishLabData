@@ -21,4 +21,9 @@ dbExecute(con, sql_insert_fhir_glasgow)
 dbExecute(con, sql_create_fhir_hic)
 dbExecute(con, sql_insert_fhir_hic_biochem)
 
-tbl = dbReadTable(con, 'FHIR_Glasgow')
+# Lothian
+dbExecute(con, sql_create_lothian_readcode)
+dbExecute(con, sql_create_fhir_lothian)
+dbExecute(con, sql_insert_fhir_lothian)
+
+tbl = dbReadTable(con, 'FHIR_Lothian')

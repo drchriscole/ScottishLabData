@@ -13,8 +13,12 @@ dbExecute(con, sql_create_dashv2)
 dbExecute(con, sql_create_fhir_dash)
 nrows = dbExecute(con, sql_insert_fhir_dash)
 
+# Glasgow
+dbExecute(con, sql_create_fhir_glasgow)
+dbExecute(con, sql_insert_fhir_glasgow)
+
 # HIC
 dbExecute(con, sql_create_fhir_hic)
 dbExecute(con, sql_insert_fhir_hic_biochem)
 
-tbl = dbReadTable(con, 'FHIR_HIC')
+tbl = dbReadTable(con, 'FHIR_Glasgow')

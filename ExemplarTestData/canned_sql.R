@@ -1,3 +1,27 @@
+##
+## Utility functions
+##
+
+createFhirTable <- function(table_name = 'FHIR') {
+    stmt = sprintf("
+CREATE TABLE %s (
+    subject             VARCHAR(50) NOT NULL,
+    category            VARCHAR(150) NULL,
+    code                VARCHAR(50) NOT NULL,
+    effectiveDate       DATE NULL,
+    valueQuantity       VARCHAR(50) NULL,
+    valueUnit           VARCHAR(50) NULL,
+    valueString         VARCHAR(1000) NULL,
+    referenceRangeHigh  REAL NULL,
+    referenceRangeLow   REAL NULL,
+    encounter           VARCHAR(50) NULL,
+    specimen            VARCHAR(50) NULL,
+    healthBoard         VARCHAR(50) NULL,
+    readCodeDescription VARCHAR(250) NULL
+)
+                   ", table_name)
+    return(stmt)
+}
 
 ##
 ## Canned SQL statements
@@ -13,23 +37,7 @@ sql_create_dashv2 = "
       FROM DaSH
 "
 
-sql_create_fhir_dash = "
-    CREATE TABLE FHIR_DaSH (
-        subject             VARCHAR(50) NOT NULL,
-        category            VARCHAR(150) NULL,
-        code                VARCHAR(50) NOT NULL,
-        effectiveDate       DATE NULL,
-        valueQuantity       VARCHAR(50) NULL,
-        valueUnit           VARCHAR(50) NULL,
-        valueString         VARCHAR(1000) NULL,
-        referenceRangeHigh  REAL NULL,
-        referenceRangeLow   REAL NULL,
-        encounter           VARCHAR(50) NULL,
-        specimen            VARCHAR(50) NULL,
-        healthBoard         VARCHAR(50) NULL,
-        readCodeDescription VARCHAR(250) NULL
-    )
-"
+sql_create_fhir_dash = createFhirTable("FHIR_DaSH")
 
 sql_insert_fhir_dash = "
     INSERT INTO FHIR_DaSH
@@ -79,23 +87,47 @@ sql_insert_fhir_dash = "
     WHERE read_code IS NOT NULL
 "
 
-sql_create_fhir_hic = "
-    CREATE TABLE FHIR_HIC (
-        subject             VARCHAR(50) NOT NULL,
-        category            VARCHAR(150) NULL,
-        code                VARCHAR(50) NOT NULL,
-        effectiveDate       DATE NULL,
-        valueQuantity       VARCHAR(50) NULL,
-        valueUnit           VARCHAR(50) NULL,
-        valueString         VARCHAR(1000) NULL,
-        referenceRangeHigh  REAL NULL,
-        referenceRangeLow   REAL NULL,
-        encounter           VARCHAR(50) NULL,
-        specimen            VARCHAR(50) NULL,
-        healthBoard         VARCHAR(50) NULL,
-        readCodeDescription VARCHAR(250) NULL
-    )
+sql_create_fhir_glasgow = createFhirTable("FHIR_Glasgow")
+
+sql_insert_fhir_glasgow = "
+    INSERT INTO FHIR_Glasgow
+        (
+            subject,
+            category,
+            code,
+            effectiveDate,
+            valueQuantity,
+            valueUnit,
+            valueString,
+            referenceRangeHigh,
+            referenceRangeLow,
+            encounter,
+            specimen,
+            healthBoard,
+            readCodeDescription
+        )
+    SELECT
+        prochi AS subject,
+        discipline AS category,
+        clinicalcodevalue AS code,
+        substr(sampledate, 1, 10) AS effectiveDate,
+        quantityvalue AS valueQuantity,
+        quantityunit AS valueUnit,
+        (case when ARITHMETICCOMPARATOR != '' 
+    	     then CONCAT(ARITHMETICCOMPARATOR, QUANTITYVALUE) 
+    		 else null 
+    		 end
+    	) as valueString,
+        rangehighvalue AS referenceRangeHigh,
+        rangelowvalue AS referenceRangeLow,
+        testid AS encounter,
+        samplename AS specimen,
+        'Glasgow' AS healthBoard,
+        clinicalcodedescription AS readCodeDescription
+    FROM Glasgow
 "
+
+sql_create_fhir_hic = createFhirTable("FHIR_HIC")
 
 sql_insert_fhir_hic_biochem = "
     INSERT INTO FHIR_HIC

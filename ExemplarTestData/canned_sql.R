@@ -23,6 +23,17 @@ CREATE TABLE %s (
     return(stmt)
 }
 
+createReadCodeTable <- function(name = 'HIC') {
+    stmt = sprintf("
+            CREATE TABLE %s_ReadCodeAggregates AS
+                SELECT code, count(*) AS recordCount, count(*)*100/sum(count(*)) over()  AS recordCountPercent, count(DISTINCT subject) AS patientCount
+                FROM FHIR_%s
+                GROUP BY code
+                ORDER BY recordCount DESC
+            ", name, name)
+    return(stmt)
+}
+
 ##
 ## Canned SQL statements
 ##

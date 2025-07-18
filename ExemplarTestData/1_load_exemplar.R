@@ -42,3 +42,5 @@ dbWriteTable(con, 'Lothian_TestCode2ReadCode', lothian_maps)
 
 print("Loaded local code mapping entries...")
 sapply(c('Lothian_TestCode2ReadCode'), tableFunc)
+
+dbDisconnect(con)

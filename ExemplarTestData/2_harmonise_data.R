@@ -26,4 +26,4 @@ dbExecute(con, sql_create_lothian_readcode)
 dbExecute(con, sql_create_fhir_lothian)
 dbExecute(con, sql_insert_fhir_lothian)
 
-tbl = dbReadTable(con, 'FHIR_Lothian')
+dbDisconnect(con)

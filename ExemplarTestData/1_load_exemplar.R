@@ -1,3 +1,7 @@
+##
+## This loads the source CSV/TSV data into an SQLite database
+##
+
 library(DBI)
 
 con <- dbConnect(RSQLite::SQLite(),

@@ -40,4 +40,4 @@ Demography <- rbind(Demography_HIC[,c("PROCHI", "sex", "anon_date_of_birth", "sc
                     Demography_DaSH[,c("PROCHI", "sex", "anon_date_of_birth", "scsimd5","From")])
 Demography <- unique(Demography)
 save(Demography_HIC, Demography_Glasgow, Demography_Lothian, Demography_DaSH, Demography, file = "Demography.RData")
-dbConnect(con)
+dbDisconnect(con)

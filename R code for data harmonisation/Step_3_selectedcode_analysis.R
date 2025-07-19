@@ -3,31 +3,17 @@ rm(list = ls()); gc()
 
 ####### pre set up #######################
 SHList <- c("HIC","Glasgow","Lothian","DaSH")
-load("./data/selectedCodes.RData")
-load("./data/Demography.RData")
+load("selectedCodes.RData")
+load("Demography.RData")
 ReadCodeList <- selectedCodes
-source("./0_functions.R")
+source("R code for data harmonisation/0_functions.R")
 
 #Set up the connection, uncomment when running example
-con <- dbConnect(odbc(),
-                 Driver = "SQL Server",
-                 Server = "localhost\\SQLEXPRESS",   
-                 Database = "example", 
-                 UID = "examplelogin",
-                 PWD="password",
-                 TrustServerCertificate="Yes")
+library(DBI)
+con <- dbConnect(RSQLite::SQLite(),
+                 "ScotLabData.db")
 
-
-#connections used when conducting this project, comment when running example
-#con <- dbConnect(odbc(),
-#                 Driver = "SQL Server",
-#                 Server = "sql.hic-tre.dundee.ac.uk",   
-#                 Database = "RDMP_3564_ExampleData", 
-#                 UID = "project-3564",
-#                 PWD = "",
-#                 TrustServerCertificate="Yes")
-
-#####################################
+###################################
 summaryTable <- data.frame(ReadCodeList)
 colnames(summaryTable)[1] <- "ReadCode"
 summaryTable$readCodeDescription <- ""
@@ -52,7 +38,7 @@ summaryTable$DaSH_range <- ""
 i=1
 for (rc in ReadCodeList) {
   
-  print(i)
+  sprintf("%3d %s", i, rc)
   data_allfour <- c()
   D <- data.frame(subject = character(), t = double(), effectiveDate =character(), From = character())
   for (SH in SHList) {
@@ -70,14 +56,15 @@ for (rc in ReadCodeList) {
       tt <- unique(t)
       tt <- tt[!is.na(tt)]
       tt <- tt[tt!=""]
-      summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_unit")] <- paste0(tt, collapse = "; ")} else {
-        summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_test_freq")] <- "NoData"
-        summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_unit")] <- "NoData"
-      }
+      summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_unit")] <- paste0(tt, collapse = "; ")
+    } else {
+      summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_test_freq")] <- "NoData"
+      summaryTable[summaryTable$ReadCode==rc,paste0(SH,"_unit")] <- "NoData"
+    }
     
     t <- data[data$code==rc,c("subject","referenceRangeHigh","referenceRangeLow" )]
     if (dim(t)[1]!=0) {
-      t$range <- paste0(round(t$referenceRangeLow,3),"--", round(t$referenceRangeHigh,3))
+      t$range <- paste0(round(as.numeric(t$referenceRangeLow),3),"--", round(as.numeric(t$referenceRangeHigh),3))
       tt <- unique(t$range)
       tt <- tt[tt!="0--0"]
       tt <- tt[tt!="NA--NA"]

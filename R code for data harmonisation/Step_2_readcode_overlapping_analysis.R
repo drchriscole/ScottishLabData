@@ -1,46 +1,19 @@
 ## clear the workspace ######
 rm(list = ls()); gc()
-source("./0_functions.R")
+source("R code for data harmonisation/0_functions.R")
 ###################################
 ######## load data ################
 ###################################
 
 #Set up the connection, uncomment when running example
-con <- dbConnect(odbc(),
-                 Driver = "SQL Server",
-                 Server = "localhost\\SQLEXPRESS",   
-                 Database = "example", 
-                 UID = "examplelogin",
-                 PWD="password",
-                 TrustServerCertificate="Yes")
+con <- dbConnect(RSQLite::SQLite(),
+                 "ScotLabData.db")
 
-
-#connections used when conducting this project, comment when running example
-#con <- dbConnect(odbc(),
-#                 Driver = "SQL Server",
-#                 Server = "sql.hic-tre.dundee.ac.uk",   
-#                 Database = "RDMP_3564_ExampleData", 
-#                 UID = "project-3564",
-#                 PWD = "",
-#                 TrustServerCertificate="Yes")
-
-TblRead <- DBI::Id(
-  schema = "dbo",
-  table = "HIC_ReadCodeAggregates")
-TblRead2 <- DBI::Id(
-  schema = "dbo",
-  table = "Glasgow_ReadCodeAggregates")
-TblRead3 <- DBI::Id(
-  schema = "dbo",
-  table = "Lothian_ReadCodeAggregates")
-TblRead4 <- DBI::Id(
-  schema = "dbo",
-  table = "DaSH_ReadCodeAggregates")
 #This reads the above table as defined under TblRead
-HIC_ReadCodeAggregates <- dbReadTable(con, TblRead)
-Glasgow_ReadCodeAggregates <- dbReadTable(con, TblRead2)
-Lothian_ReadCodeAggregates <- dbReadTable(con, TblRead3)
-DaSH_ReadCodeAggregates <- dbReadTable(con, TblRead4)
+HIC_ReadCodeAggregates <- dbReadTable(con, "HIC_ReadCodeAggregates")
+Glasgow_ReadCodeAggregates <- dbReadTable(con, "Glasgow_ReadCodeAggregates")
+Lothian_ReadCodeAggregates <- dbReadTable(con, "Lothian_ReadCodeAggregates")
+DaSH_ReadCodeAggregates <- dbReadTable(con, "DaSH_ReadCodeAggregates")
 ###################################
 ###### venn diagram ###############
 ###################################
@@ -48,6 +21,7 @@ Lothian_ReadCodeAggregates <- Lothian_ReadCodeAggregates[order(-Lothian_ReadCode
 HIC_ReadCodeAggregates <- HIC_ReadCodeAggregates[order(-HIC_ReadCodeAggregates$recordCount),]
 Glasgow_ReadCodeAggregates <- Glasgow_ReadCodeAggregates[order(-Glasgow_ReadCodeAggregates$recordCount),]
 DaSH_ReadCodeAggregates <- DaSH_ReadCodeAggregates[order(-DaSH_ReadCodeAggregates$recordCount),]
+dbDisconnect(con)
 
 ### calculate how many unique test across SHs##
 ########### 09/14/2023 ########################
@@ -55,15 +29,16 @@ all <- rbind(Lothian_ReadCodeAggregates, HIC_ReadCodeAggregates, Glasgow_ReadCod
 length(unique(all$code))
 
 t <- c(HIC_ReadCodeAggregates[1:100,"code"],Glasgow_ReadCodeAggregates[1:100,"code"],Lothian_ReadCodeAggregates[1:100,"code"],DaSH_ReadCodeAggregates[1:100,"code"])
+t <- na.omit(t)
 t <- unique(t)
 t <- t[!t==""]    #180 codes
 
 selectedCodes <- na.omit(t)
-save(selectedCodes, file = "./data/selectedCodes.RData")
+save(selectedCodes, file = "selectedCodes.RData")
 
 x <- list(
   HIC=HIC_ReadCodeAggregates[HIC_ReadCodeAggregates[,"code"] %in% t,"code"],  # 135
-  Glasgow=Glasgow_ReadCodeAggregates[Glasgow_ReadCodeAggregates[,"code"] %in% t,"code"],  #128
+  WoS=Glasgow_ReadCodeAggregates[Glasgow_ReadCodeAggregates[,"code"] %in% t,"code"],  #128
   DataLoch=Lothian_ReadCodeAggregates[Lothian_ReadCodeAggregates[,"code"] %in% t,"code"],  #121
   DaSH=DaSH_ReadCodeAggregates[DaSH_ReadCodeAggregates[,"code"] %in% t,"code"]   #126
 )

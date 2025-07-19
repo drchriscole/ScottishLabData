@@ -38,7 +38,8 @@ summaryTable$DaSH_range <- ""
 i=1
 for (rc in ReadCodeList) {
   
-  sprintf("%3d %s", i, rc)
+  s = sprintf("%3d %s", i, rc)
+  print(s)
   data_allfour <- c()
   D <- data.frame(subject = character(), t = double(), effectiveDate =character(), From = character())
   for (SH in SHList) {
@@ -95,9 +96,9 @@ for (rc in ReadCodeList) {
   D <- na.omit(D)
   data_allfour <- na.omit(data_allfour)
   if (length(data_allfour)>0) {
-  tt <- data.frame(table(data_allfour))
-  tt <- tt[tt$data_allfour != "",]
-  summaryTable[summaryTable$ReadCode==rc,"readCodeDescription"] <- paste0(tt[tt$Freq==max(tt$Freq),"data_allfour"], collapse = "; ")
+    tt <- data.frame(table(data_allfour))
+    tt <- tt[tt$data_allfour != "",]
+    summaryTable[summaryTable$ReadCode==rc,"readCodeDescription"] <- paste0(tt[tt$Freq==max(tt$Freq),"data_allfour"], collapse = "; ")
   }
   
 
@@ -153,17 +154,17 @@ for (rc in ReadCodeList) {
   dev.off()
   i=i+1
 }
-save(summaryTable, file = "./data/summaryTable.RData")
+save(summaryTable, file = "summaryTable.RData")
 
 ####################################################
 ############# compare the frequency ################
 ################### 14/09/2023 #####################
 t <- summaryTable[,c(1:6)]
 
-for(i in 1:180) {
-tt <- t[i,c(3:6)]
-tt <- tt[,!is.na(as.numeric(tt))]  # remove "NoData" items   
-t[i,"freqcompare"] <- max(as.double(tt))/min(as.double(tt))
+for(i in 1:nrow(t)) {
+    tt <- t[i,c(3:6)]
+    tt <- tt[,!is.na(as.numeric(tt))]  # remove "NoData" items   
+    t[i,"freqcompare"] <- max(as.double(tt))/min(as.double(tt))
 }
 
 table(t$freqcompare>10)

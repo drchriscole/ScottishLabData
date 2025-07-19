@@ -23,24 +23,25 @@ selectReadCode <- function(rc = '413L.', sh = 'DaSH') {
 for (code in ReadCodeList) {
     print(code)
     dash_rc = selectReadCode(rc = code, sh = 'DaSH')
-    if (nrow(df) < 2) {
+    if (nrow(dash_rc) < 2) {
         print ("Fewer than two datapoints in DaSH")
     }
     glasgow_rc = selectReadCode(rc = code, sh = 'Glasgow')
-    if (nrow(df) < 2) {
+    if (nrow(glasgow_rc) < 2) {
         print ("Fewer than two datapoints in Glasgow")
     }
     hic_rc = selectReadCode(rc = code, sh = 'HIC')
-    if (nrow(df) < 2) {
+    if (nrow(hic_rc) < 2) {
         print ("Fewer than two datapoints in HIC")
     }
     lothian_rc = selectReadCode(rc = code, sh = 'Lothian')
-    if (nrow(df) < 2) {
+    if (nrow(lothian_rc) < 2) {
         print ("Fewer than two datapoints in Lothian")
     }
     
     df = rbind(dash_rc, glasgow_rc, hic_rc, lothian_rc)
     if (nrow(df) == 0) {
+        warning(paste(code,"has no data."))
         next
     }
     

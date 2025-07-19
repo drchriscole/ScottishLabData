@@ -59,4 +59,4 @@ for (SH in SHList) {
     save(unittransferdatalose, file ="unittransferdatalose.RData" )
 
 }
-
+dbDisconnect(con)

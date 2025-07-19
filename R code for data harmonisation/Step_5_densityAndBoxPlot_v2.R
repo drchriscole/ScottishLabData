@@ -10,30 +10,14 @@ library(eeptools)
 library(plyr)
 library(dplyr)
 
-source("0_functions.R")
-load("./data/Demography.RData")
+source("R code for data harmonisation/0_functions.R")
+load("Demography.RData")
 
 #Set up the connection, uncomment when running example
-con <- dbConnect(odbc(),
-                 Driver = "SQL Server",
-                 Server = "localhost\\SQLEXPRESS",   
-                 Database = "example", 
-                 UID = "examplelogin",
-                 PWD="password",
-                 TrustServerCertificate="Yes")
+con <- dbConnect(RSQLite::SQLite(),
+                 "ScotLabData.db")
 
-
-#connections used when conducting this project, comment when running example
-#con <- dbConnect(odbc(),
-#                 Driver = "SQL Server",
-#                 Server = "sql.hic-tre.dundee.ac.uk",   
-#                 Database = "RDMP_3564_ExampleData", 
-#                 UID = "project-3564",
-#                 PWD = "",
-#                 TrustServerCertificate="Yes")
-
-
-load("./data/selectedCodes.RData")
+load("selectedCodes.RData")
 ReadCodeList <- selectedCodes
 
 ##########################################
@@ -43,7 +27,8 @@ SHList <- c("HIC","Glasgow","Lothian","DaSH")
 i=1
 for (rc in ReadCodeList) {
 ####### load raw data  ############
-  print(i)
+  s = sprintf("%3d %s", i, rc)
+  print(s)
   D <- data.frame(subject = character(), t = double(), effectiveDate =character(), From = character())
   for (SH in SHList) {
     Q = paste0("SELECT * FROM FHIR_", SH," WHERE code = '", rc,"'")
@@ -58,7 +43,7 @@ for (rc in ReadCodeList) {
     
     t <- data[data$code==rc,c("subject","referenceRangeHigh","referenceRangeLow" )]
     if (dim(t)[1]!=0) {
-      t$range <- paste0(round(t$referenceRangeLow,3),"--", round(t$referenceRangeHigh,3))
+      t$range <- paste0(round(as.numeric(t$referenceRangeLow,3)),"--", round(as.numeric(t$referenceRangeHigh,3)))
       tt <- unique(t$range)
       tt <- tt[tt!="0--0"]
       tt <- tt[tt!="NA--NA"]

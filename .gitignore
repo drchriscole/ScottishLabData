@@ -4,3 +4,6 @@
 .Ruserdata
 ScotLabData.db
 *.Rproj
+.DS_Store
+plot
+*.RData

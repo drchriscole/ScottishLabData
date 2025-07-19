@@ -9,7 +9,7 @@ library(RColorBrewer)
 library(ggplot2)
 display.brewer.all()
 
-load("./data/Demography.RData")
+load("Demography.RData")
 
 Demography[is.na(Demography$scsimd5), "scsimd5"] <- "NoData"
 Demography <- Demography[Demography$anon_date_of_birth!="",]

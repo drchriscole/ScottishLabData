@@ -4,8 +4,13 @@
 
 library(DBI)
 
-con <- dbConnect(RSQLite::SQLite(),
-                 "ScotLabData.db")
+dbFile = "ScotLabData.db"
+if (file.exists(dbFile)) {
+    # Delete file if it exists
+    file.remove(dbFile)
+}
+
+con <- dbConnect(RSQLite::SQLite(), dbFile)
 
 ## Load lab data
 dash = read.csv("ExemplarTestData/DaSH.csv")
